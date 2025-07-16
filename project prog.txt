@@ -1,0 +1,47 @@
+Import the  libraries
+
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+import math
+import os
+import cv2
+
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler, LabelEncoder
+from sklearn.model_selection import train_test_split
+
+Import the dataset
+
+DIR = "WasteImagesDataset/"
+
+train_dataset = tf.keras.preprocessing.image_dataset_from_directory(DIR, validation_split=0.1, 
+                                                                    subset="training", seed=42, 
+                                                                    batch_size=16, smart_resize=True)
+
+test_dataset = tf.keras.preprocessing.image_dataset_from_directory(DIR, validation_split=0.1,
+                                                                  subset="validation", seed=42,
+                                                                  batch_size=16, smart_resize=True)
+
+Optimise the training and testing performance
+
+classes = train_dataset.class_names
+numClasses = len(train_dataset.class_names)
+print(classes, numClasses)
+
+AUTOTUNE = tf.data.AUTOTUNE
+train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
+test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
+
+Performing Data Augmentation
+
+data_augmentation = tf.keras.Sequential([
+    tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
+    tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
+    tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
+])
+
+preprocess_input = tf.keras.applications.inception_v3.preprocess_input
+global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
+
